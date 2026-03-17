@@ -1,0 +1,137 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Profession {
+  id              String           @id @default(cuid())
+  slug            String           @unique
+  name            String
+  description     String
+  iconKey         String           @default("briefcase")
+  sortOrder       Int              @default(0)
+  isActive        Boolean          @default(true)
+  seoTitle        String?
+  seoDesc         String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  toolProfessions ToolProfession[]
+  taskProfessions TaskProfession[]
+}
+
+model Tool {
+  id              String           @id @default(cuid())
+  slug            String           @unique
+  name            String
+  shortDesc       String
+  status          ToolStatus       @default(DRAFT)
+  specVersion     Int              @default(1)
+  blueprint       String           @default("text-generator")
+  fieldsSchema    Json
+  promptTemplate  String
+  promptLibrary   Json             @default("[]")
+  guideContent    Json             @default("[]")
+  faq             Json             @default("[]")
+  aiOutputEnabled Boolean          @default(false)
+  relatedSlugs    Json             @default("[]")
+  seoToolTitle    String?
+  seoToolDesc     String?
+  seoPromptTitle  String?
+  seoPromptDesc   String?
+  seoGuideTitle   String?
+  seoGuideDesc    String?
+  publishedAt     DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  toolProfessions ToolProfession[]
+  taskTools       TaskTool[]
+  toolRuns        ToolRun[]
+
+  @@index([status])
+}
+
+model Task {
+  id              String           @id @default(cuid())
+  slug            String           @unique
+  name            String
+  description     String
+  status          TaskStatus       @default(DRAFT)
+  seoTitle        String?
+  seoDesc         String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  taskTools       TaskTool[]
+  taskProfessions TaskProfession[]
+
+  @@index([status])
+}
+
+model ToolProfession {
+  toolId       String
+  professionId String
+  isPrimary    Boolean    @default(false)
+  sortOrder    Int        @default(0)
+  tool         Tool       @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  profession   Profession @relation(fields: [professionId], references: [id], onDelete: Cascade)
+
+  @@id([toolId, professionId])
+  @@index([professionId])
+  @@index([toolId])
+}
+
+model TaskTool {
+  taskId    String
+  toolId    String
+  isPrimary Boolean  @default(false)
+  sortOrder Int      @default(0)
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tool      Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, toolId])
+}
+
+model TaskProfession {
+  taskId       String
+  professionId String
+  sortOrder    Int        @default(0)
+  task         Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  profession   Profession @relation(fields: [professionId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, professionId])
+}
+
+model ToolRun {
+  id              String   @id @default(cuid())
+  toolId          String
+  sessionId       String
+  fieldValues     Json
+  generatedPrompt String
+  aiOutput        String?
+  aiWasUsed       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  tool            Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+
+  @@index([toolId])
+  @@index([createdAt])
+}
+
+enum ToolStatus {
+  DRAFT
+  REVIEW
+  LIVE
+  ARCHIVED
+}
+
+enum TaskStatus {
+  DRAFT
+  LIVE
+  ARCHIVED
+}
