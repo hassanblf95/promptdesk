@@ -1,18 +1,26 @@
 import { PrismaClient } from '@prisma/client'
+import { PrismaNeon } from '@prisma/adapter-neon'
+import { Pool, neonConfig } from '@neondatabase/serverless'
+import ws from 'ws'
+
+// Required for Neon serverless driver in Node.js runtime (not needed in edge/Deno)
+neonConfig.webSocketConstructor = ws
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-// Prefer direct URL to avoid PgBouncer pooler connection issues in serverless.
-// Falls back to DATABASE_URL if DIRECT_URL is not set.
-const datasourceUrl = process.env.DIRECT_URL || process.env.DATABASE_URL
-
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+function createPrismaClient() {
+  // Use DATABASE_URL (pooled) for queries; DIRECT_URL is only used by Prisma CLI
+  const connectionString = process.env.DATABASE_URL!
+  const pool = new Pool({ connectionString })
+  const adapter = new PrismaNeon(pool)
+  return new PrismaClient({
+    adapter,
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-    datasources: { db: { url: datasourceUrl } },
   })
+}
+
+export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
