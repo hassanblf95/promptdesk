@@ -16,22 +16,22 @@ const adminPaths = ['admin', 'api', 'prompts', 'blog', 'tasks']
 
 async function getProfessionData(slug: string) {
   try {
-    return await prisma.profession.findUnique({
+    const profession = await prisma.profession.findUnique({
       where: { slug, isActive: true },
       include: {
-        toolProfessions: {
-          where: { tool: { status: 'LIVE' } },
-          include: {
-            tool: true,
-          },
-          orderBy: { sortOrder: 'asc' },
-        },
         taskProfessions: {
           include: { task: true },
           orderBy: { sortOrder: 'asc' },
         },
       },
     })
+    if (!profession) return null
+
+    const tools = await prisma.tool.findMany({
+      where: { professionSlug: slug, status: 'LIVE' },
+    })
+
+    return { ...profession, tools }
   } catch (error) {
     console.error('[ProfessionPage] DB error for slug:', slug, error)
     return null
@@ -65,7 +65,7 @@ export default async function ProfessionPage({ params }: Props) {
   const profession = await getProfessionData(params.profession)
   if (!profession) return notFound()
 
-  const tools = profession.toolProfessions.map(tp => tp.tool)
+  const tools = profession.tools
   const tasks = profession.taskProfessions
     .map(tp => tp.task)
     .filter((t) => t.status === 'LIVE')

@@ -34,6 +34,7 @@ model Tool {
   name            String
   shortDesc       String
   status          ToolStatus       @default(DRAFT)
+  professionSlug  String?
   specVersion     Int              @default(1)
   blueprint       String           @default("text-generator")
   fieldsSchema    Json
@@ -57,6 +58,7 @@ model Tool {
   toolRuns        ToolRun[]
 
   @@index([status])
+  @@index([professionSlug])
 }
 
 model Task {
