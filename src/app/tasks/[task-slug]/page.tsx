@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db'
 import { SiteLayout } from '@/components/layout/SiteLayout'
 import { ToolCard } from '@/components/tools/ToolCard'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 interface Props {
   params: { 'task-slug': string }
@@ -37,18 +37,6 @@ async function getTaskData(slug: string) {
   } catch (error) {
     console.error('[TaskPage] DB error:', error)
     return null
-  }
-}
-
-export async function generateStaticParams() {
-  try {
-    const tasks = await prisma.task.findMany({
-      where: { status: 'LIVE' },
-      select: { slug: true },
-    })
-    return tasks.map(t => ({ 'task-slug': t.slug }))
-  } catch {
-    return []
   }
 }
 

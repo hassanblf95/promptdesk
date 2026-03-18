@@ -7,7 +7,7 @@ import { PromptLibraryRenderer } from '@/components/content/PromptLibraryRendere
 import { FaqRenderer } from '@/components/content/FaqRenderer'
 import type { PromptEntry, FaqEntry } from '@/types'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 interface Props {
   params: { 'tool-slug': string }
@@ -27,18 +27,6 @@ async function getToolData(slug: string) {
   } catch (error) {
     console.error('[PromptsPage] DB error:', error)
     return null
-  }
-}
-
-export async function generateStaticParams() {
-  try {
-    const tools = await prisma.tool.findMany({
-      where: { status: 'LIVE' },
-      select: { slug: true },
-    })
-    return tools.map(t => ({ 'tool-slug': t.slug }))
-  } catch {
-    return []
   }
 }
 

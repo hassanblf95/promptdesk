@@ -3,6 +3,8 @@ import { prisma } from '@/lib/db'
 import { ToolEditor } from '@/components/admin/ToolEditor'
 import type { ToolField, GuideSection, PromptEntry, FaqEntry } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   params: { id: string }
 }

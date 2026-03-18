@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { prisma } from '@/lib/db'
 import { SiteLayout } from '@/components/layout/SiteLayout'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Task Hub — AI Tools by Task | PromptDesk',

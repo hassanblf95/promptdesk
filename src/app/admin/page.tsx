@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { Plus, Upload, Wrench, Users, BarChart3, Clock } from 'lucide-react'
 import { prisma } from '@/lib/db'
 
+export const dynamic = 'force-dynamic'
+
 async function getStats() {
   try {
     const [toolsByStatus, totalProfessions, totalTasks, todayRuns] = await Promise.all([

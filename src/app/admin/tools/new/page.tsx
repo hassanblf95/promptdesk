@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/db'
 import { ToolEditor } from '@/components/admin/ToolEditor'
 
+export const dynamic = 'force-dynamic'
+
 export default async function NewToolPage() {
   const professions = await prisma.profession.findMany({
     where: { isActive: true },

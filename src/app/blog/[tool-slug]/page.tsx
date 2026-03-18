@@ -7,7 +7,7 @@ import { GuideRenderer } from '@/components/content/GuideRenderer'
 import { FaqRenderer } from '@/components/content/FaqRenderer'
 import type { GuideSection, FaqEntry } from '@/types'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 interface Props {
   params: { 'tool-slug': string }
@@ -50,18 +50,6 @@ async function getRelatedGuides(currentSlug: string, professionId: string) {
       },
       take: 3,
     })
-  } catch {
-    return []
-  }
-}
-
-export async function generateStaticParams() {
-  try {
-    const tools = await prisma.tool.findMany({
-      where: { status: 'LIVE' },
-      select: { slug: true },
-    })
-    return tools.map(t => ({ 'tool-slug': t.slug }))
   } catch {
     return []
   }

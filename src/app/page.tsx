@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db'
 import { SiteLayout } from '@/components/layout/SiteLayout'
 import { ToolCard } from '@/components/tools/ToolCard'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'PromptDesk — Free AI Tools for Professionals',

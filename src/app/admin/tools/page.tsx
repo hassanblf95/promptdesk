@@ -3,6 +3,8 @@ import { Plus, Edit, ExternalLink } from 'lucide-react'
 import { prisma } from '@/lib/db'
 import { StatusBadge } from '@/components/admin/StatusBadge'
 
+export const dynamic = 'force-dynamic'
+
 interface SearchParams {
   status?: string
   q?: string

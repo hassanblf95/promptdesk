@@ -6,7 +6,7 @@ import { SiteLayout } from '@/components/layout/SiteLayout'
 import { ToolCard } from '@/components/tools/ToolCard'
 import type { ToolField } from '@/types'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 interface Props {
   params: { profession: string }
@@ -35,18 +35,6 @@ async function getProfessionData(slug: string) {
   } catch (error) {
     console.error('[ProfessionPage] DB error for slug:', slug, error)
     return null
-  }
-}
-
-export async function generateStaticParams() {
-  try {
-    const professions = await prisma.profession.findMany({
-      where: { isActive: true },
-      select: { slug: true },
-    })
-    return professions.map(p => ({ profession: p.slug }))
-  } catch {
-    return []
   }
 }
 

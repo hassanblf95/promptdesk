@@ -9,7 +9,7 @@ import { GuideRenderer } from '@/components/content/GuideRenderer'
 import { FaqRenderer } from '@/components/content/FaqRenderer'
 import type { ToolField, GuideSection, FaqEntry } from '@/types'
 
-export const revalidate = 1800
+export const dynamic = 'force-dynamic'
 
 interface Props {
   params: { profession: string; 'tool-slug': string }
@@ -50,34 +50,6 @@ async function getRelatedTools(slugs: string[]) {
       },
       take: 4,
     })
-  } catch {
-    return []
-  }
-}
-
-export async function generateStaticParams() {
-  try {
-    const tools = await prisma.tool.findMany({
-      where: { status: 'LIVE' },
-      include: {
-        toolProfessions: {
-          where: { isPrimary: true },
-          include: { profession: true },
-        },
-      },
-    })
-
-    const params = []
-    for (const tool of tools) {
-      const primaryProfession = tool.toolProfessions[0]?.profession
-      if (primaryProfession) {
-        params.push({
-          profession: primaryProfession.slug,
-          'tool-slug': tool.slug,
-        })
-      }
-    }
-    return params
   } catch {
     return []
   }
