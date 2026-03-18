@@ -5,7 +5,7 @@ export default async function NewToolPage() {
   const [professions, tasks] = await Promise.all([
     prisma.profession.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
     prisma.task.findMany({ orderBy: { name: 'asc' } }),
-  ])
+  ]).catch(() => [[], []] as const)
 
   return (
     <div className="space-y-6">

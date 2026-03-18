@@ -3,28 +3,32 @@ import { Plus, Upload, Wrench, Users, BarChart3, Clock } from 'lucide-react'
 import { prisma } from '@/lib/db'
 
 async function getStats() {
-  const [toolsByStatus, totalProfessions, totalTasks, todayRuns] = await Promise.all([
-    prisma.tool.groupBy({
-      by: ['status'],
-      _count: { id: true },
-    }),
-    prisma.profession.count({ where: { isActive: true } }),
-    prisma.task.count(),
-    prisma.toolRun.count({
-      where: {
-        createdAt: {
-          gte: new Date(new Date().setHours(0, 0, 0, 0)),
+  try {
+    const [toolsByStatus, totalProfessions, totalTasks, todayRuns] = await Promise.all([
+      prisma.tool.groupBy({
+        by: ['status'],
+        _count: { id: true },
+      }),
+      prisma.profession.count({ where: { isActive: true } }),
+      prisma.task.count(),
+      prisma.toolRun.count({
+        where: {
+          createdAt: {
+            gte: new Date(new Date().setHours(0, 0, 0, 0)),
+          },
         },
-      },
-    }),
-  ])
+      }),
+    ])
 
-  const statusCounts: Record<string, number> = {}
-  for (const item of toolsByStatus) {
-    statusCounts[item.status] = item._count.id
+    const statusCounts: Record<string, number> = {}
+    for (const item of toolsByStatus) {
+      statusCounts[item.status] = item._count.id
+    }
+
+    return { statusCounts, totalProfessions, totalTasks, todayRuns }
+  } catch {
+    return { statusCounts: {}, totalProfessions: 0, totalTasks: 0, todayRuns: 0 }
   }
-
-  return { statusCounts, totalProfessions, totalTasks, todayRuns }
 }
 
 export default async function AdminDashboard() {

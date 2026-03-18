@@ -39,7 +39,7 @@ export default async function AdminToolsPage({
       take: PAGE_SIZE,
     }),
     prisma.tool.count({ where }),
-  ])
+  ]).catch(() => [[], 0] as const)
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
