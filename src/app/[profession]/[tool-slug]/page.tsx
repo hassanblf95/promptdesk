@@ -16,39 +16,43 @@ interface Props {
 }
 
 async function getToolData(professionSlug: string, toolSlug: string) {
-  const tool = await prisma.tool.findFirst({
-    where: {
-      slug: toolSlug,
-      status: 'LIVE',
-      toolProfessions: {
-        some: { profession: { slug: professionSlug } },
+  try {
+    return await prisma.tool.findFirst({
+      where: {
+        slug: toolSlug,
+        status: 'LIVE',
+        toolProfessions: {
+          some: { profession: { slug: professionSlug } },
+        },
       },
-    },
-    include: {
-      toolProfessions: {
-        include: { profession: true },
+      include: {
+        toolProfessions: {
+          include: { profession: true },
+        },
       },
-    },
-  })
-  return tool
+    })
+  } catch (error) {
+    console.error('[ToolPage] DB error:', error)
+    return null
+  }
 }
 
 async function getRelatedTools(slugs: string[]) {
   if (!slugs || slugs.length === 0) return []
-
-  return prisma.tool.findMany({
-    where: {
-      slug: { in: slugs },
-      status: 'LIVE',
-    },
-    include: {
-      toolProfessions: {
-        where: { isPrimary: true },
-        include: { profession: true },
+  try {
+    return await prisma.tool.findMany({
+      where: { slug: { in: slugs }, status: 'LIVE' },
+      include: {
+        toolProfessions: {
+          where: { isPrimary: true },
+          include: { profession: true },
+        },
       },
-    },
-    take: 4,
-  })
+      take: 4,
+    })
+  } catch {
+    return []
+  }
 }
 
 export async function generateStaticParams() {

@@ -28,7 +28,7 @@ export default async function TasksIndexPage() {
       },
     },
     orderBy: { createdAt: 'desc' },
-  })
+  }).catch(() => [])
 
   return (
     <SiteLayout>

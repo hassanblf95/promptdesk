@@ -14,38 +14,45 @@ interface Props {
 }
 
 async function getToolData(slug: string) {
-  return prisma.tool.findFirst({
-    where: { slug, status: 'LIVE' },
-    include: {
-      toolProfessions: {
-        where: { isPrimary: true },
-        include: { profession: true },
+  try {
+    return await prisma.tool.findFirst({
+      where: { slug, status: 'LIVE' },
+      include: {
+        toolProfessions: {
+          where: { isPrimary: true },
+          include: { profession: true },
+        },
+        taskTools: {
+          where: { isPrimary: true },
+          include: { task: true },
+        },
       },
-      taskTools: {
-        where: { isPrimary: true },
-        include: { task: true },
-      },
-    },
-  })
+    })
+  } catch (error) {
+    console.error('[GuidePage] DB error:', error)
+    return null
+  }
 }
 
 async function getRelatedGuides(currentSlug: string, professionId: string) {
-  return prisma.tool.findMany({
-    where: {
-      status: 'LIVE',
-      slug: { not: currentSlug },
-      toolProfessions: {
-        some: { professionId },
+  try {
+    return await prisma.tool.findMany({
+      where: {
+        status: 'LIVE',
+        slug: { not: currentSlug },
+        toolProfessions: { some: { professionId } },
       },
-    },
-    include: {
-      toolProfessions: {
-        where: { isPrimary: true },
-        include: { profession: true },
+      include: {
+        toolProfessions: {
+          where: { isPrimary: true },
+          include: { profession: true },
+        },
       },
-    },
-    take: 3,
-  })
+      take: 3,
+    })
+  } catch {
+    return []
+  }
 }
 
 export async function generateStaticParams() {

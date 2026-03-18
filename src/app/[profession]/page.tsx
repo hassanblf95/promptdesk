@@ -15,22 +15,27 @@ interface Props {
 const adminPaths = ['admin', 'api', 'prompts', 'blog', 'tasks']
 
 async function getProfessionData(slug: string) {
-  return prisma.profession.findUnique({
-    where: { slug, isActive: true },
-    include: {
-      toolProfessions: {
-        where: { tool: { status: 'LIVE' } },
-        include: {
-          tool: true,
+  try {
+    return await prisma.profession.findUnique({
+      where: { slug, isActive: true },
+      include: {
+        toolProfessions: {
+          where: { tool: { status: 'LIVE' } },
+          include: {
+            tool: true,
+          },
+          orderBy: { sortOrder: 'asc' },
         },
-        orderBy: { sortOrder: 'asc' },
+        taskProfessions: {
+          include: { task: true },
+          orderBy: { sortOrder: 'asc' },
+        },
       },
-      taskProfessions: {
-        include: { task: true },
-        orderBy: { sortOrder: 'asc' },
-      },
-    },
-  })
+    })
+  } catch (error) {
+    console.error('[ProfessionPage] DB error for slug:', slug, error)
+    return null
+  }
 }
 
 export async function generateStaticParams() {
@@ -46,7 +51,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const profession = await getProfessionData(params.profession)
+  const profession = await getProfessionData(params.profession).catch(() => null)
   if (!profession) return {}
 
   const title = profession.seoTitle || `AI Tools for ${profession.name} | PromptDesk`

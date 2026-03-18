@@ -12,27 +12,32 @@ interface Props {
 }
 
 async function getTaskData(slug: string) {
-  return prisma.task.findFirst({
-    where: { slug, status: 'LIVE' },
-    include: {
-      taskTools: {
-        orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }],
-        include: {
-          tool: {
-            include: {
-              toolProfessions: {
-                where: { isPrimary: true },
-                include: { profession: true },
+  try {
+    return await prisma.task.findFirst({
+      where: { slug, status: 'LIVE' },
+      include: {
+        taskTools: {
+          orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }],
+          include: {
+            tool: {
+              include: {
+                toolProfessions: {
+                  where: { isPrimary: true },
+                  include: { profession: true },
+                },
               },
             },
           },
         },
+        taskProfessions: {
+          include: { profession: true },
+        },
       },
-      taskProfessions: {
-        include: { profession: true },
-      },
-    },
-  })
+    })
+  } catch (error) {
+    console.error('[TaskPage] DB error:', error)
+    return null
+  }
 }
 
 export async function generateStaticParams() {

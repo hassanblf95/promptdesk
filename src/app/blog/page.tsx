@@ -27,7 +27,7 @@ export default async function BlogIndexPage() {
       },
     },
     orderBy: { publishedAt: 'desc' },
-  })
+  }).catch(() => [])
 
   return (
     <SiteLayout>

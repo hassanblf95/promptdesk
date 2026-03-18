@@ -27,7 +27,7 @@ export default async function PromptsIndexPage() {
       },
     },
     orderBy: { publishedAt: 'desc' },
-  })
+  }).catch(() => [])
 
   return (
     <SiteLayout>

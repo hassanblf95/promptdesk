@@ -14,15 +14,20 @@ interface Props {
 }
 
 async function getToolData(slug: string) {
-  return prisma.tool.findFirst({
-    where: { slug, status: 'LIVE' },
-    include: {
-      toolProfessions: {
-        where: { isPrimary: true },
-        include: { profession: true },
+  try {
+    return await prisma.tool.findFirst({
+      where: { slug, status: 'LIVE' },
+      include: {
+        toolProfessions: {
+          where: { isPrimary: true },
+          include: { profession: true },
+        },
       },
-    },
-  })
+    })
+  } catch (error) {
+    console.error('[PromptsPage] DB error:', error)
+    return null
+  }
 }
 
 export async function generateStaticParams() {
