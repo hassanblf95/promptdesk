@@ -26,20 +26,19 @@ export default async function AdminToolsPage({
     ...(query ? { name: { contains: query, mode: 'insensitive' as const } } : {}),
   }
 
-  const [tools, total] = await Promise.all([
-    prisma.tool.findMany({
-      where,
-      include: {
-        toolProfessions: {
-          include: { profession: true },
-        },
+  const tools = await prisma.tool.findMany({
+    where,
+    include: {
+      toolProfessions: {
+        include: { profession: true },
       },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: PAGE_SIZE,
-    }),
-    prisma.tool.count({ where }),
-  ]).catch(() => [[], 0] as const)
+    },
+    orderBy: { createdAt: 'desc' },
+    skip,
+    take: PAGE_SIZE,
+  }).catch(() => [])
+
+  const total = await prisma.tool.count({ where }).catch(() => 0)
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
